@@ -1,0 +1,44 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "A basic CF template that creates a Centos ec2 instance in aws london vpc",
+    "Metadata": {
+
+    },
+    "Parameters": {
+    
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+     
+      "EC2Instance": {
+          "Type": "AWS::EC2::Instance",
+          "Properties": {
+              "ImageId": "ami-ee6a718a",
+              "InstanceType": "t2.micro",
+              "Monitoring": "false",
+              "SubnetId": "subnet-8e101ff5",
+              "KeyName" : "AWS London",
+              "SecurityGroupIds" : ["sg-42d2962a"],
+              "UserData": {
+                  "Fn::Base64": {
+                      "Fn::Join": [
+                          "",
+                          [
+                              "#!/bin/bash -ex",
+                              "yum update nano tree -y"
+                          ]
+                      ]
+                  }
+              }
+          }
+      }
+    },
+    "Outputs": {
+
+    }
+}
