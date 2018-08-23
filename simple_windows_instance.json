@@ -1,0 +1,57 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "A template to create a windows instance",
+    "Metadata": {
+
+    },
+    "Parameters": {
+    
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+      
+      "WindowsServer": {
+          "Type": "AWS::EC2::Instance",
+          "Properties": {
+              "KeyName": "AWS London",
+              "ImageId": "ami-1c46a47b",
+              "InstanceType": "t2.micro",
+              "Monitoring": "false",
+              "NetworkInterfaces" : [
+                {
+                  "AssociatePublicIpAddress" : "true",
+                  "SubnetId" : "subnet-8e101ff5",
+                  "GroupSet" : ["sg-ecd29684"],
+                  "DeviceIndex": "0"
+                }
+              ],
+              "Tags": [
+                  {
+                      "Key": "Name",
+                      "Value": "Win2016-new"
+                  }
+              ],
+              "UserData": {
+                "Fn::Base64": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "<powershell>\n",
+                            "New-Item C:/Users/Administrator/Desktop/samplefile.txt -ItemType file", "\n",
+                            "</powershell>"
+                        ]
+                    ]
+                }
+              }
+           }
+      }
+    },
+    "Outputs": {
+
+    }
+}
