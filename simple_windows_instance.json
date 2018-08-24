@@ -1,57 +1,80 @@
 {
-"AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "A template to create a windows instance",
-    "Metadata": {
-
-    },
-    "Parameters": {
+    "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "A template to create a windows instance",
+        "Metadata": {
     
-    },
-    "Mappings": {
+        },
+        "Parameters": {
+        
+        },
+        "Mappings": {
+    
+        },
+        "Conditions": {
+    
+        },
+        "Resources": {
 
-    },
-    "Conditions": {
-
-    },
-    "Resources": {
-      
-      "WindowsServer": {
-          "Type": "AWS::EC2::Instance",
-          "Properties": {
-              "KeyName": "AWS London",
-              "ImageId": "ami-1c46a47b",
-              "InstanceType": "t2.micro",
-              "Monitoring": "false",
-              "NetworkInterfaces" : [
-                {
-                  "AssociatePublicIpAddress" : "true",
-                  "SubnetId" : "subnet-8e101ff5",
-                  "GroupSet" : ["sg-ecd29684"],
-                  "DeviceIndex": "0"
-                }
-              ],
-              "Tags": [
-                  {
-                      "Key": "Name",
-                      "Value": "Win2016-new"
-                  }
-              ],
-              "UserData": {
-                "Fn::Base64": {
-                    "Fn::Join": [
-                        "",
-                        [
-                            "<powershell>\n",
-                            "New-Item C:/Users/Administrator/Desktop/samplefile.txt -ItemType file", "\n",
-                            "</powershell>"
+            "WindowsServer": {
+                "Type": "AWS::EC2::Instance",
+                "Properties": {
+                  "KeyName": "AWS London",
+                  "ImageId": "ami-1c46a47b",
+                  "InstanceType": "t2.micro",
+                  "Monitoring": "false",
+                  "NetworkInterfaces" : [
+                    {
+                      "AssociatePublicIpAddress" : "true",
+                      "SubnetId" : "subnet-8e101ff5",
+                      "GroupSet" : ["sg-ecd29684"],
+                      "DeviceIndex": "0"
+                    }
+                  ],
+                  "Tags": [
+                      {
+                          "Key": "Name",
+                          "Value": "Win2016-new"
+                      }
+                  ],
+                  "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "<powershell>\n",
+                                "New-Item C:/Users/Administrator/Desktop/samplefile.txt -ItemType file", "\n",
+                                "cfn-init.exe -v -s blackpillow -r WindowsServer --region eu-west-2", "\n",
+                                "</powershell>"
+                            ]
                         ]
-                    ]
+                    }
+                  }
+               },
+               "Metadata" : {
+                "AWS::CloudFormation::Init" : {
+                    "config" : {
+                        "files": {
+                            "C:/Users/Administrator/Desktop/cfnfile.txt" : {
+                                "content" : "I am created from cfn metadata - file resource"
+                            }
+                        },
+                        "commands" : {
+                            "create_a_test_file" : {
+                                "command" : "echo $VARIABLE > testfile.txt",
+                                "env" : { "VARIABLE" : "some sample content from command file create_a_test_file" },
+                                "cwd" : "C:/Users/Administrator/Desktop/"
+                            },
+                            "process_file" : {
+                                "command" : "Get-Process | Out-File -filepath process.txt",
+                                "cwd" : "C:/Users/Administrator/Desktop/"
+                            }
+                        }
+                    }
                 }
               }
-           }
-      }
-    },
-    "Outputs": {
-
+            }
+          },
+        "Outputs": {
+    
+        }
     }
-}
