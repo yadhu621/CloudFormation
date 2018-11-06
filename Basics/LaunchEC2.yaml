@@ -1,13 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Launch a Centos7 instance in AWS London
-Metadata: 
-
-Parameters: 
-
-Mappings: 
-
-Conditions: 
-
+Description: Launch a Amazon Linux instance in AWS London
 Resources: 
   EC2Instance:
     Type: AWS::EC2::Instance
@@ -15,5 +7,3 @@ Resources:
       ImageId: ami-017b0e29fac27906b
       InstanceType: t2.nano
       SubnetId: subnet-074ce7a864d83c7b2
-
-Outputs:
