@@ -1,0 +1,12 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Launch a Amazon Linux instance in AWS London
+Resources: 
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-017b0e29fac27906b
+      InstanceType: t2.nano
+      SubnetId: subnet-074ce7a864d83c7b2
+      Tags:
+        Key: Name 
+        Value: Simple instance
