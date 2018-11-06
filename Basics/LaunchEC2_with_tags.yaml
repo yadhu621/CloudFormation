@@ -8,5 +8,5 @@ Resources:
       InstanceType: t2.nano
       SubnetId: subnet-074ce7a864d83c7b2
       Tags:
-        Key: Name 
-        Value: Simple instance
+        - Key: Name 
+          Value: Simple instance
