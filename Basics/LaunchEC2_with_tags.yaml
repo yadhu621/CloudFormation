@@ -10,3 +10,5 @@ Resources:
       Tags:
         - Key: Name 
           Value: Simple instance
+        - Key: Location
+          Value: !Join [ " ", [ Server, in, AWS, London ] ]
