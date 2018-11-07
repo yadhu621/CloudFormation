@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Demo use of outputs and public ip association 
+Mappings:
+  AMIMap:
+    eu-west-1:
+      RHEL: ami-00001111
+      AmazonLinux: ami-00002222
+      Suse: ami-00003333
+      Ubuntu: ami-00004444
+    eu-west-2:
+      RHEL: ami-017b0e29fac27906b
+      AmazonLinux: ami-017b0e29fac27906b
+      Suse: ami-0ec5eddd70b0a01a3
+      Ubuntu: ami-0b0a60c0a2bd40612
+Parameters:
+  SGName:
+    Description: Name for the SG
+    Type: String
+    Default: instance-sg
+  SGDescription:
+    Description: Text for the SG description 
+    Type: String
+    Default: Allow SSH
+  SubnetID:
+    Description: Subnet to launch instance in
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-074ce7a864d83c7b2
+Resources: 
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    # Using FindInMap to refer the AMIMap
+    Properties:
+      ImageId: !FindInMap
+        - AMIMap
+        - !Ref AWS::Region
+        - AmazonLinux
+      InstanceType: t2.nano
+#      SubnetId: !Ref SubnetID 
+      Tags:
+        - Key: Name 
+          Value: Simple instance
+        - Key: Location
+          Value: !Join [ " ", [ Server, in, AWS, London ] ]
+        - Key: Nickname
+          Value: AmazonLinuxInstance
+#      SecurityGroupIds:
+#        - !Ref MySecurityGroup
+      NetworkInterfaces: # To automatically associate a public ip address
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet: 
+            - !Ref MySecurityGroup
+          SubnetId: !Ref SubnetID
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Ref SGName
+      GroupDescription: !Ref SGDescription
+      VpcId: vpc-38d1c851
+      SecurityGroupIngress:
+        - IpProtocol: tcp 
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+# google GetAtt to get a list of all attributes that you can output from a resource 
+Outputs:
+  ServerDNS:
+    Value: !GetAtt
+      - EC2Instance
+      - PublicDnsName
+  InstancePrivateIP:
+    Value: !Sub ${EC2Instance.PrivateIp}
+    

@@ -1,5 +1,17 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Demo use of Parameters 
+Description: Demo use of Mappings and pseudoparameter (such as AWS::Region)
+Mappings:
+  AMIMap:
+    eu-west-1:
+      RHEL: ami-00001111
+      AmazonLinux: ami-00002222
+      Suse: ami-00003333
+      Ubuntu: ami-00004444
+    eu-west-2:
+      RHEL: ami-017b0e29fac27906b
+      AmazonLinux: ami-017b0e29fac27906b
+      Suse: ami-0ec5eddd70b0a01a3
+      Ubuntu: ami-0b0a60c0a2bd40612
 Parameters:
   SGName:
     Description: Name for the SG
@@ -9,14 +21,18 @@ Parameters:
     Type: String
   SubnetID:
     Description: Subnet to launch instance in
-    Type: AWS::EC2::Subnet
+    Type: AWS::EC2::Subnet::Id
 Resources: 
   EC2Instance:
     Type: AWS::EC2::Instance
+    # Using FindInMap to refer the AMIMap
     Properties:
-      ImageId: ami-017b0e29fac27906b
+      ImageId: !FindInMap
+        - AMIMap
+        - !Ref AWS::Region
+        - Ubuntu
       InstanceType: t2.nano
-      SubnetId: !Ref SubnetID
+      SubnetId: !Ref SubnetID 
       Tags:
         - Key: Name 
           Value: Simple instance
