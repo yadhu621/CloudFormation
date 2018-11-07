@@ -1,13 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Demo use of Parameters 
 Parameters:
-  SG-Name:
+  SGName:
     Description: Name for the SG
     Type: String
-  SG-Description:
+  SGDescription:
     Description: Text for the SG description 
     Type: String
-  Subnet-ID:
+  SubnetID:
     Description: Subnet to launch instance in
     Type: AWS::EC2::Subnet
 Resources: 
