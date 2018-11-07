@@ -16,7 +16,7 @@ Resources:
     Properties:
       ImageId: ami-017b0e29fac27906b
       InstanceType: t2.nano
-      SubnetId: !Ref Subnet-ID
+      SubnetId: !Ref SubnetID
       Tags:
         - Key: Name 
           Value: Simple instance
@@ -29,8 +29,8 @@ Resources:
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Ref SG-Name
-      GroupDescription: !Ref SG-Description
+      GroupName: !Ref SGName
+      GroupDescription: !Ref SGDescription
       VpcId: vpc-38d1c851
       SecurityGroupIngress:
         - IpProtocol: tcp 
