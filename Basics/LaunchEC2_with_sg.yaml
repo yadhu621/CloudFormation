@@ -14,3 +14,17 @@ Resources:
           Value: !Join [ " ", [ Server, in, AWS, London ] ]
         - Key: Nickname
           Value: AmazonLinuxInstance
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: myinstance-sg
+      GroupDescription: Allow ports for SSH
+      VpcId: vpc-38d1c851
+      SecurityGroupIngress:
+        - IpProtocol: SSH 
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
