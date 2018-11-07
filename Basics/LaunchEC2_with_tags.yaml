@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Launch a Amazon Linux instance in AWS London
+Description: Demo use of !Join
 Resources: 
   EC2Instance:
     Type: AWS::EC2::Instance

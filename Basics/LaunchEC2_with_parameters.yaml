@@ -1,12 +1,22 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Demo use of !Ref
+Description: Demo use of Parameters 
+Parameters:
+  SG-Name:
+    Description: Name for the SG
+    Type: String
+  SG-Description:
+    Description: Text for the SG description 
+    Type: String
+  Subnet-ID:
+    Description: Subnet to launch instance in
+    Type: AWS::EC2::Subnet
 Resources: 
   EC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-017b0e29fac27906b
       InstanceType: t2.nano
-      SubnetId: subnet-074ce7a864d83c7b2
+      SubnetId: !Ref Subnet-ID
       Tags:
         - Key: Name 
           Value: Simple instance
@@ -19,8 +29,8 @@ Resources:
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: myinstance-sg
-      GroupDescription: Allow ports for SSH
+      GroupName: !Ref SG-Name
+      GroupDescription: !Ref SG-Description
       VpcId: vpc-38d1c851
       SecurityGroupIngress:
         - IpProtocol: tcp 
