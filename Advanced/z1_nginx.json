@@ -1,0 +1,114 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Template to launch nginx in aws london",
+    "Metadata": {
+
+    },
+    "Parameters": {
+        "Environment": {
+            "Type": "String",
+            "Default": "Development",
+            "AllowedValues": [
+                "Development",
+                "Test",
+                "Staging",
+                "Demo",
+                "Production"
+            ],
+            "Description": "Choose Environment type"
+        },
+        "MyExternalSG": {
+            "Type": "String",
+            "AllowedValues":["sg-373d645c","sg-42d2962a"],
+            "Description": "Specify external sg"
+        }
+    },
+
+
+    "Mappings": {
+        "Environments": {
+            "Development" :{
+                "InternalInterfaceAZ1": "subnet-05bdc9ea11ca55a42",
+                "ExternalInterfaceAZ1": "subnet-07b71c35b0d60024a",
+                "InternalInterfaceAZ2": "subnet-097f6f2d0599bbe7c",
+                "ExternalInterfaceAZ2": "subnet-0d0932cd0029fe044",
+                "ExternalNGINXSecurityGroups": [
+                    {"Ref":"MyExternalSG"}
+                  ],
+                "InternalNGINXSecurityGroups": [
+                    {"Ref":"MyExternalSG"},
+                    "sg-42d2962a"
+                  ],
+                "InstanceType": "t2.nano",
+                "amiref": "ami-017b0e29fac27906b"
+            }
+        }
+    },
+
+
+    "Resources": {
+        
+        "NginxInstanceAZ1": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "InstanceType": {
+                    "Fn::FindInMap": ["Environments", {"Ref":"Environment"}, "InstanceType"]
+                },
+                "ImageId":  {
+                    "Fn::FindInMap": ["Environments", {"Ref":"Environment"}, "amiref"]
+                },
+                "IamInstanceProfile": "Nginx-iam-role",
+                "NetworkInterfaces" : [
+                    {
+                        "NetworkInterfaceId": {"Ref": "InternalInterfaceAZ1"},
+                        "DeviceIndex": "0"
+                    },
+                    {
+                        "NetworkInterfaceId": {"Ref": "ExternalInterfaceAZ1"},
+                        "DeviceIndex": "1"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "-",
+                        "Value": "-"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -ex",
+                                "-"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+
+
+        "InternalInterfaceAZ1": {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties": {
+                "SubnetId": { "Fn::FindInMap": ["Environments", {"Ref":"Environment"}, "InternalInterfaceAZ1"] },
+                "Description": "Interface for Internal traffic",
+                "GroupSet": { "Fn::FindInMap": ["Environments", {"Ref":"Environment"}, "InternalNGINXSecurityGroups"] }
+            }
+        },
+
+
+        "ExternalInterfaceAZ1": {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties": {
+                "SubnetId": { "Fn::FindInMap": ["Environments", {"Ref":"Environment"}, "ExternalInterfaceAZ1"] },
+                "Description": "Interface for web traffic",
+                "GroupSet": { "Fn::FindInMap": ["Environments", {"Ref":"Environment"}, "ExternalNGINXSecurityGroups"] }
+            }
+        }
+    },
+    "Outputs": {
+
+    }
+}
