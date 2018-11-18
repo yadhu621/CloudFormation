@@ -1,0 +1,119 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "Create an EC2 instance running the Amazon Windows AMI.",
+
+  "Parameters" : {
+      "InstanceType": {
+          "Description": "Windows Server EC2 instance type",
+          "Type": "String",
+          "Default": "t2.medium",
+          "AllowedValues": [
+            "t2.medium"
+          ],
+          "ConstraintDescription": "must be a valid EC2 instance type."
+      },
+      "SecurityGroup": {
+          "Description": "Security Group That Allows Instance to Instance Access.",
+          "Type": "AWS::EC2::SecurityGroup::Id",
+          "Default": "sg-10e59a78"
+      },
+      "WindowsSubnet": {
+          "Description": "Private Subnet to Deploy Windows 2012 R2 Instances.",
+          "Type": "AWS::EC2::Subnet::Id",
+          "Default": "subnet-c37bc1b9"
+      },
+      "DomainAdminUser": {
+          "Description": "User name for the account that will be added as Domain Administrator. This is separate from the default \"Administrator\" account",
+          "Type": "String",
+          "Default": "Administrator"
+      },
+      "AdminPassword": {
+          "NoEcho": "true",
+          "Description" : "The Windows administrator account password",
+          "Type": "String",
+          "MinLength": "8",
+          "MaxLength": "41" 
+      },
+      "DomainDNSName": {
+          "Description": "Fully qualified domain name (FQDN) of the forest root domain",
+          "Type": "String",
+          "Default": "sandpitdc.local"
+      },
+      "DomainNetBiosName": {
+          "Description": "Netbios name for the domain",
+          "Type": "String",
+          "Default": "sandpitdc"
+      }
+  },
+  "Mappings" : {
+    "RegionMap" : {
+      "eu-central-1" : {
+          "AMI" : "ami-09670c1490fee3f16"
+      }
+    }
+  },
+  "Resources" : {
+    "Ec2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "InstanceType": { "Ref": "InstanceType" },
+        "ImageId" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI" ]},
+        "NetworkInterfaces":[ { "GroupSet": [ { "Ref": "SecurityGroup" }], "AssociatePublicIpAddress": "false", "DeviceIndex": "0", "SubnetId": { "Ref": "WindowsSubnet"} }],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "<powershell>\n",
+                
+                "### Join the domain...\n",             
+                "$computer = Get-WmiObject -Class Win32_ComputerSystem \n",
+                "if ($computer.domain -eq 'WORKGROUP') { \n",
+                "  $adapter = Get-NetAdapter -Name 'Ethernet*'\n",
+                "  $domain = '",
+                {
+                  "Ref": "DomainDNSName"
+                },
+                "'\n",
+                "  $password = '",
+                {
+                  "Ref": "AdminPassword"
+                },
+                "' | ConvertTo-SecureString -asPlainText -Force \n",
+                "  $Administrator = '",
+                {
+                  "Ref": "DomainNetBiosName"
+                },
+                "\\",
+                {
+                  "Ref": "DomainAdminUser"
+                },
+                "'\n",
+                "  $credential = New-Object System.Management.Automation.PSCredential($Administrator,$password) \n",
+                "  Add-Computer -DomainName $domain -Credential $credential -restart \n",
+                "}\n",
+                "</powershell>\n"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  "Outputs" : {
+    "InstanceId" : {
+      "Description" : "InstanceId of the newly created EC2 instance",
+      "Value" : { "Ref" : "Ec2Instance" }
+    },
+    "AZ" : {
+      "Description" : "Availability Zone of the newly created EC2 instance",
+      "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "AvailabilityZone" ] }
+    },
+    "PrivateIP" : {
+      "Description" : "Private IP address of the newly created EC2 instance",
+      "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "PrivateIp" ] }
+    }
+  }
+}

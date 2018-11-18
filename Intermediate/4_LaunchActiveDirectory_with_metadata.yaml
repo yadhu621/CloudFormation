@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Demo userdata on Windows on cmd
+Mappings:
+  AMIMap:
+    eu-west-1:
+      RHEL: ami-00001111
+      AmazonLinux: ami-00002222
+      Suse: ami-00003333
+      Ubuntu: ami-00004444
+    eu-west-2:
+      RHEL: ami-017b0e29fac27906b
+      AmazonLinux: ami-017b0e29fac27906b
+      Suse: ami-0ec5eddd70b0a01a3
+      Ubuntu: ami-0b0a60c0a2bd40612
+      Windows: ami-0f5f78829606035fc
+Parameters:
+  MyKeyName:
+    Description: My keypair name 
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: 'AWS London'
+  SGName:
+    Description: Name for the SG
+    Type: String
+    Default: instance-sg
+  SGDescription:
+    Description: Text for the SG description 
+    Type: String
+    Default: Allow RDP
+  SubnetID:
+    Description: Subnet to launch instance in
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-074ce7a864d83c7b2
+Resources: 
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref MyKeyName
+      ImageId: !FindInMap
+        - AMIMap
+        - !Ref AWS::Region
+        - Windows
+      InstanceType: t2.small
+      Tags:
+        - Key: Name 
+          Value: Simple instance
+        - Key: Location
+          Value: !Join [ " ", [ Server, in, AWS, London ] ]
+        - Key: Nickname
+          Value: AmazonLinuxInstance
+      NetworkInterfaces: # To automatically associate a public ip address
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet: 
+            - !Ref MySecurityGroup
+          SubnetId: !Ref SubnetID
+      UserData:
+        Fn::Base64:
+          !Sub |
+            <script>
+              ipconfig > %USERPROFILE%\Desktop\ipconfig.txt
+              echo "Date and Time" > %USERPROFILE%\Desktop\datetime.txt
+              echo %DATE%:%TIME% >> %USERPROFILE%\Desktop\datetime.txt
+            </script>
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Ref SGName
+      GroupDescription: !Ref SGDescription
+      VpcId: vpc-38d1c851
+      SecurityGroupIngress:
+        - IpProtocol: tcp 
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+Outputs:
+  InstancePrivateIP:
+    Description: The private ip of the instance
+    Value: !Sub ${EC2Instance.PrivateIp}
+  ServerDNS:
+    Value: !GetAtt
+      - EC2Instance
+      - PublicDnsName

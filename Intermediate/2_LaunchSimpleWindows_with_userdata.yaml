@@ -25,7 +25,7 @@ Parameters:
   SGDescription:
     Description: Text for the SG description 
     Type: String
-    Default: Allow SSH
+    Default: Allow RDP
   SubnetID:
     Description: Subnet to launch instance in
     Type: AWS::EC2::Subnet::Id
@@ -39,7 +39,7 @@ Resources:
         - AMIMap
         - !Ref AWS::Region
         - Windows
-      InstanceType: t2.nano
+      InstanceType: t2.small
       Tags:
         - Key: Name 
           Value: Simple instance
@@ -59,9 +59,8 @@ Resources:
             <script>
               ipconfig > %USERPROFILE%\Desktop\ipconfig.txt
               echo "Date and Time" > %USERPROFILE%\Desktop\datetime.txt
-              echo %Date%:%Time% >> %USERPROFILE%\Desktop\datetime.txt
-            <script>
-
+              echo %DATE%:%TIME% >> %USERPROFILE%\Desktop\datetime.txt
+            </script>
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -70,8 +69,8 @@ Resources:
       VpcId: vpc-38d1c851
       SecurityGroupIngress:
         - IpProtocol: tcp 
-          FromPort: 22
-          ToPort: 22
+          FromPort: 3389
+          ToPort: 3389
           CidrIp: 0.0.0.0/0
 Outputs:
   InstancePrivateIP:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Demo userdata on Linux 
+Description: Launch a PHP website on Linux using userdata and metadata
 Mappings:
   AMIMap:
     eu-west-1:
@@ -16,7 +16,7 @@ Parameters:
   MyKeyName:
     Description: My keypair name 
     Type: AWS::EC2::KeyPair::KeyName
-    Default: AWSLondon
+    Default: 'AWS London'
   SGName:
     Description: Name for the SG
     Type: String
@@ -56,8 +56,24 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-            yum install -y tree 
-            touch /etc/mongo.conf
+            ## trigger cfn-init
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --region ${AWS::Region}
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+              php: []
+          files:
+            /var/www/html/index.php:
+              content: !Sub |
+                <?php print "Hello World from Linux server"; ?>
+          services:
+            sysvinit:
+              httpd: 
+                enabled: true
+                ensureRunning: true
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -68,6 +84,10 @@ Resources:
         - IpProtocol: tcp 
           FromPort: 22
           ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp 
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
 Outputs:
   InstancePrivateIP:
