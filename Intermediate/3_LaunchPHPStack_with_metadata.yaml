@@ -60,6 +60,7 @@ Resources:
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --region ${AWS::Region}
     Metadata:
       AWS::CloudFormation::Init:
+        # packages, sources, users, groups, files, commands, services
         config:
           packages:
             yum:
